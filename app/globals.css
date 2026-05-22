@@ -1,0 +1,38 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #081120;
+  color: white;
+  overflow-x: hidden;
+}
+
+.gradient-bg {
+  background:
+    radial-gradient(circle at top right, rgba(255,122,0,0.15), transparent 25%),
+    #081120;
+}
+
+.glass {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.section-padding {
+  padding: 100px 0;
+}
+
+.container-custom {
+  width: 100%;
+  max-width: 1280px;
+  margin: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
