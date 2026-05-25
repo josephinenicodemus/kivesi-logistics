@@ -1,9 +1,13 @@
+'use client'
 
 import { motion } from 'framer-motion'
 
 export default function Hero() {
   return (
-    <section id="home" className="min-h-screen flex items-center pt-28">
+    <section
+      id="home"
+      className="min-h-screen flex items-center pt-28"
+    >
       <div className="container-custom">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -19,15 +23,22 @@ export default function Hero() {
           </h1>
 
           <p className="text-gray-300 text-lg leading-8 mb-10 max-w-xl">
-            Efficient transportation, cargo handling, and logistics services tailored for businesses across East Africa.
+            Efficient transportation, cargo handling, and logistics services
+            tailored for businesses across East Africa.
           </p>
 
-          <div className="flex gap-5">
-            <a href="tel:+255700000000" className="bg-orange px-7 py-4 rounded-full font-semibold">
+          <div className="flex flex-wrap gap-5">
+            <a
+              href="tel:+255700000000"
+              className="bg-orange px-7 py-4 rounded-full font-semibold hover:scale-105 transition"
+            >
               Call Now
             </a>
 
-            <a href="https://wa.me/255700000000" className="border border-white/20 px-7 py-4 rounded-full">
+            <a
+              href="https://wa.me/255700000000"
+              className="border border-white/20 px-7 py-4 rounded-full hover:border-orange transition"
+            >
               WhatsApp Us
             </a>
           </div>
