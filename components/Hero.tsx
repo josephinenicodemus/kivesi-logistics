@@ -1,573 +1,458 @@
 'use client'
 
 import Image from 'next/image'
-import Link from 'next/link'
-import { motion, useReducedMotion, type Variants } from 'framer-motion'
-import {
-  Phone,
-  MessageCircle,
-  ArrowRight,
-  CheckCircle,
-  Shield,
-  Navigation,
-  ChevronDown,
-  Zap,
-  Globe,
-} from 'lucide-react'
-import AnimatedCounter from '@/components/ui/AnimatedCounter'
-import { COMPANY_PHONE, COMPANY_WHATSAPP } from '@/lib/data'
+import { motion, Variants } from 'framer-motion'
 
-/* ─────────────────────────────────────────────────────────────
-   DESIGN TOKENS  — blue/silver brand system
-   All colour decisions centralised here so a single edit
-   propagates across every sub-component.
-───────────────────────────────────────────────────────────── */
+/* =========================================
+   BRAND THEME: Kivesi Logistics
+   - Primary: Deep Premium Blue (#0a1628 → #1e3a5f)
+   - Accent: Silver/Metallic (#94a3b8, #cbd5e1)
+   - Background: Dark Navy (#061120)
+   - Text: White (#ffffff) + Soft Gray (#94a3b8)
+========================================= */
 
-const BLUE = {
-  glow:    'rgba(59,130,246,0.18)',
-  glowSm:  'rgba(59,130,246,0.12)',
-  border:  'rgba(147,197,253,0.14)',   // blue-200/14
-  badge:   'rgba(59,130,246,0.10)',
-  card:    'rgba(8,20,40,0.88)',
-  ring:    '#3B82F6',
-} as const
-
-/* ─────────────────────────────────────────────────────────────
-   ANIMATION VARIANTS
-   — Defined at module scope (never recreated on re-render).
-   — honour prefers-reduced-motion via useReducedMotion hook.
-   — ease curve matches the project-wide [0.22, 1, 0.36, 1].
-───────────────────────────────────────────────────────────── */
-
-const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
-
+/* =========================================
+   Animation Variants
+========================================= */
 const containerVariants: Variants = {
-  hidden: {},
+  hidden: { opacity: 0 },
   visible: {
-    transition: { staggerChildren: 0.11, delayChildren: 0.18 },
-  },
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+      ease: [0.22, 1, 0.36, 1] // Premium cubic-bezier
+    }
+  }
 }
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 26 },
+  hidden: { opacity: 0, y: 32 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.58, ease: EASE },
-  },
+    transition: {
+      duration: 0.6,
+      ease: [0.22, 1, 0.36, 1]
+    }
+  }
 }
 
 const imageVariants: Variants = {
-  hidden: { opacity: 0, x: 44, scale: 0.98 },
+  hidden: { opacity: 0, scale: 0.97, filter: 'blur(8px)' },
   visible: {
     opacity: 1,
-    x: 0,
     scale: 1,
-    transition: { duration: 0.85, ease: EASE, delay: 0.2 },
-  },
+    filter: 'blur(0px)',
+    transition: {
+      duration: 0.9,
+      delay: 0.3,
+      ease: [0.22, 1, 0.36, 1]
+    }
+  }
 }
 
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 16, scale: 0.94 },
-  visible: (delay: number) => ({
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { duration: 0.52, ease: EASE, delay },
-  }),
-}
-
-/* ─────────────────────────────────────────────────────────────
-   STATIC DATA
-   ─ Trust badges shown under the CTA buttons
-   ─ Stats in the bottom divider row
-   ─ Floating info cards overlaid on the image
-───────────────────────────────────────────────────────────── */
-
-const TRUST_BADGES = [
-  { icon: CheckCircle, label: 'Fully Insured Cargo' },
-  { icon: Shield,      label: 'GPS-Tracked Fleet'   },
-  { icon: Globe,       label: 'Trusted Since 2010'  },
+/* =========================================
+   Constants
+========================================= */
+const stats = [
+  { value: '500+', label: 'Deliveries Completed' },
+  { value: '50+', label: 'Fleet Vehicles' },
+  { value: '20+', label: 'Regions Covered' }
 ] as const
 
-const STATS = [
-  { value: 5200, suffix: '+', label: 'Deliveries Completed' },
-  { value: 80,   suffix: '+', label: 'Fleet Vehicles'       },
-  { value: 25,   suffix: '+', label: 'Regions Covered'      },
-  { value: 350,  suffix: '+', label: 'Corporate Clients'    },
-] as const
-
-/* Floating card layout config
-   position:  Tailwind classes for absolute placement
-   floatY:    y keyframe array for the floating animation
-   delay:     stagger delay for the card's reveal */
-const FLOATING_CARDS = [
-  {
-    id: 'delivery',
-    icon: CheckCircle,
-    title: '98.5%',
-    sub: 'On-Time Delivery',
-    position: 'absolute -top-6 -left-10',
-    floatY: [0, -10, 0],
-    delay: 0.92,
-  },
-  {
-    id: 'insured',
-    icon: Shield,
-    title: 'Fully Insured',
-    sub: 'All Cargo Protected',
-    position: 'absolute top-1/2 -translate-y-1/2 -left-12',
-    floatY: [0, -6, 0],
-    delay: 1.06,
-  },
-  {
-    id: 'tracking',
-    icon: Navigation,
-    title: 'GPS Tracked',
-    sub: 'Real-Time Updates',
-    position: 'absolute -bottom-6 -right-8',
-    floatY: [0, 8, 0],
-    delay: 1.2,
-  },
-] as const
-
-/* ─────────────────────────────────────────────────────────────
-   SUB-COMPONENT  FloatingCard
-   ─ Extracted so the right-column JSX stays readable
-   ─ Receives reduced-motion flag from parent to skip animation
-───────────────────────────────────────────────────────────── */
-
-interface FloatingCardProps {
-  icon: typeof CheckCircle
-  title: string
-  sub: string
-  positionClass: string
-  floatY: number[]
-  delay: number
-  reduceMotion: boolean
-}
-
-function FloatingCard({
-  icon: Icon,
-  title,
-  sub,
-  positionClass,
-  floatY,
-  delay,
-  reduceMotion,
-}: FloatingCardProps) {
-  return (
-    <motion.div
-      custom={delay}
-      variants={cardVariants}
-      initial="hidden"
-      animate="visible"
-      className={`${positionClass} hidden lg:block`}
-      aria-hidden="true"
-    >
-      <motion.div
-        animate={reduceMotion ? undefined : { y: floatY }}
-        transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay: delay * 0.5 }}
-        className="flex items-center gap-3 whitespace-nowrap rounded-xl px-4 py-3"
-        style={{
-          background: BLUE.card,
-          border: `1px solid ${BLUE.border}`,
-          backdropFilter: 'blur(18px)',
-          WebkitBackdropFilter: 'blur(18px)',
-          boxShadow: `0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.04)`,
-        }}
-      >
-        <div
-          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg"
-          style={{ background: 'rgba(59,130,246,0.15)', border: `1px solid rgba(147,197,253,0.20)` }}
-        >
-          <Icon size={16} className="text-blue-300" strokeWidth={1.8} />
-        </div>
-        <div>
-          <p className="font-poppins text-sm font-bold leading-tight text-white">{title}</p>
-          <p className="font-inter text-[11px] leading-tight text-slate-400">{sub}</p>
-        </div>
-      </motion.div>
-    </motion.div>
-  )
-}
-
-/* ─────────────────────────────────────────────────────────────
-   SUB-COMPONENT  CTAButton  (primary + secondary variants)
-───────────────────────────────────────────────────────────── */
-
-interface CTAButtonProps {
-  href: string
-  label: string
-  ariaLabel: string
-  icon: typeof Phone
-  variant: 'primary' | 'secondary' | 'ghost'
-  external?: boolean
-}
-
-function CTAButton({ href, label, ariaLabel, icon: Icon, variant, external }: CTAButtonProps) {
-  const base =
-    'group inline-flex items-center justify-center gap-2.5 rounded-xl px-7 py-3.5 font-poppins text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2'
-
-  const variants = {
-    primary: `
-      ${base}
-      text-white
-      focus:ring-blue-400 focus:ring-offset-[#04101E]
-    `,
-    secondary: `
-      ${base}
-      text-blue-200 hover:text-white
-      focus:ring-blue-400/50 focus:ring-offset-[#04101E]
-    `,
-    ghost: `
-      ${base}
-      text-slate-300 hover:text-white
-      focus:ring-slate-400/50 focus:ring-offset-[#04101E]
-    `,
-  }
-
-  const primaryStyle = {
-    background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 60%, #1E40AF 100%)',
-    boxShadow: '0 0 0 1px rgba(147,197,253,0.15), 0 4px 24px rgba(37,99,235,0.35)',
-  }
-  const secondaryStyle = {
-    background: 'rgba(37,99,235,0.08)',
-    border: `1px solid rgba(147,197,253,0.18)`,
-    backdropFilter: 'blur(12px)',
-  }
-  const ghostStyle = {
-    background: 'rgba(255,255,255,0.04)',
-    border: '1px solid rgba(255,255,255,0.08)',
-    backdropFilter: 'blur(12px)',
-  }
-
-  const styleMap = { primary: primaryStyle, secondary: secondaryStyle, ghost: ghostStyle }
-
-  return (
-    <a
-      href={href}
-      aria-label={ariaLabel}
-      target={external ? '_blank' : undefined}
-      rel={external ? 'noopener noreferrer' : undefined}
-      className={variants[variant]}
-      style={styleMap[variant]}
-    >
-      <Icon size={15} strokeWidth={2.2} aria-hidden="true" className="flex-shrink-0" />
-      {label}
-      {variant === 'ghost' && (
-        <ArrowRight
-          size={13}
-          className="translate-x-0 transition-transform duration-200 group-hover:translate-x-0.5"
-          aria-hidden="true"
-        />
-      )}
-    </a>
-  )
-}
-
-/* ─────────────────────────────────────────────────────────────
-   MAIN COMPONENT  HeroSection
-───────────────────────────────────────────────────────────── */
-
-export default function HeroSection() {
-  // Wire Framer Motion to the OS reduced-motion preference
-  const reduceMotion = useReducedMotion() ?? false
-
+/* =========================================
+   Component
+========================================= */
+export default function Hero() {
   return (
     <section
       id="home"
-      aria-label="Kivesi Logistics — premium freight solutions across Tanzania"
-      className="relative flex min-h-screen items-center overflow-hidden"
-      style={{ background: 'linear-gradient(160deg, #04101E 0%, #060F1A 50%, #071228 100%)' }}
+      className="relative min-h-screen flex items-center overflow-hidden bg-[#061120]"
+      aria-labelledby="hero-heading"
+      style={{
+        scrollBehavior: 'smooth'
+      }}
     >
-
-      {/* ══════════════════════════════════════
-          BACKGROUND LAYER
-          – No animate-pulse on blur elements (GPU cost)
-          – aria-hidden keeps decorative nodes off a11y tree
-      ══════════════════════════════════════ */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-
-        {/* Primary blue radial — top-right */}
+      {/* =========================================
+          CINEMATIC BACKGROUND LAYERS
+      ========================================= */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Deep Blue Radial Glow with Pulse Animation */}
         <div
-          className="absolute -right-[8%] -top-[12%] h-[540px] w-[540px] rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(37,99,235,0.22) 0%, transparent 70%)' }}
-        />
-
-        {/* Secondary blue — bottom-left */}
-        <div
-          className="absolute -bottom-[15%] -left-[8%] h-[460px] w-[460px] rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%)' }}
-        />
-
-        {/* Centre line accent — premium horizontal rule */}
-        <div
-          className="absolute left-0 right-0 top-[42%] h-px"
-          style={{ background: 'linear-gradient(90deg, transparent, rgba(147,197,253,0.06) 40%, rgba(147,197,253,0.06) 60%, transparent)' }}
-        />
-
-        {/* Subtle dot grid */}
-        <div
-          className="absolute inset-0 opacity-[0.032]"
+          aria-hidden="true"
+          className="absolute top-[-15%] right-[-8%] h-[600px] w-[600px] rounded-full 
+                     bg-gradient-to-br from-[#1e3a5f]/30 via-[#0f2543]/20 to-transparent 
+                     blur-[140px] animate-[pulse-slow_4s_cubic-bezier(0.4,0,0.6,1)_infinite]"
           style={{
-            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.85) 1px, transparent 1px)',
-            backgroundSize: '44px 44px',
+            ['--pulse-opacity-1' as string]: '0.3',
+            ['--pulse-opacity-2' as string]: '0.5',
           }}
         />
+
+        {/* Silver Accent Glow */}
+        <div
+          aria-hidden="true"
+          className="absolute bottom-[-10%] left-[-5%] h-[400px] w-[400px] rounded-full 
+                     bg-gradient-to-tr from-[#94a3b8]/15 via-transparent to-transparent 
+                     blur-[100px]"
+        />
+
+        {/* Subtle Grid Pattern (Industrial Feel) */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 opacity-[0.03] 
+                     [background-image:linear-gradient(to_right,#94a3b8_1px,transparent_1px),linear-gradient(to_bottom,#94a3b8_1px,transparent_1px)] 
+                     [background-size:80px_80px]"
+        />
+
+        {/* Vignette Overlay for Cinematic Depth */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-gradient-to-b from-transparent via-[#061120]/20 to-[#061120]"
+        />
       </div>
 
-      {/* ══════════════════════════════════════
-          MAIN CONTENT GRID
-      ══════════════════════════════════════ */}
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pb-20 pt-28 sm:px-6 lg:grid lg:grid-cols-2 lg:items-center lg:gap-12 lg:px-8 lg:pb-24 lg:pt-36">
-
-        {/* ─────────────────────────────────────
-            LEFT COLUMN  —  copy, CTAs, stats
-        ───────────────────────────────────── */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="flex flex-col"
-        >
-
-          {/* ── Status badge ── */}
-          <motion.div variants={itemVariants} className="mb-6 self-start">
-            <div
-              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5"
-              style={{
-                background: BLUE.badge,
-                border: `1px solid ${BLUE.border}`,
-                backdropFilter: 'blur(10px)',
-              }}
-            >
-              {/* Live pulse dot */}
-              <span className="relative flex h-2 w-2 flex-shrink-0">
-                <span
-                  className="absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"
-                  style={reduceMotion ? {} : { animation: 'ping 1.8s cubic-bezier(0,0,0.2,1) infinite' }}
-                />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-400" />
-              </span>
-              <span className="font-poppins text-[11px] font-semibold uppercase tracking-[3px] text-blue-200">
-                Tanzania's Trusted Logistics Partner
-              </span>
-            </div>
-          </motion.div>
-
-          {/* ── Headline ── */}
-          <motion.h1
-            variants={itemVariants}
-            className="mb-5 font-poppins text-[2.6rem] font-extrabold leading-[1.09] tracking-tight text-white sm:text-5xl lg:text-[3.2rem] xl:text-[3.6rem]"
-          >
-            Reliable Logistics
-            <br />
-            {/* Silver-to-blue shimmer — premium, not cyan */}
-            <span
-              className="bg-clip-text text-transparent"
-              style={{ backgroundImage: 'linear-gradient(100deg, #FFFFFF 0%, #BFDBFE 45%, #60A5FA 100%)' }}
-            >
-              &amp; Freight Solutions
-            </span>
-            <br />
-            Across Tanzania
-          </motion.h1>
-
-          {/* ── Body copy ── */}
-          <motion.p
-            variants={itemVariants}
-            className="mb-8 max-w-[500px] font-inter text-base leading-relaxed text-slate-400 sm:text-[1.07rem]"
-          >
-            Efficient transportation, cargo handling, and freight solutions{' '}
-            <span className="font-medium text-slate-200">tailored for enterprise clients</span>{' '}
-            across East Africa. Fast, secure, and always on time.
-          </motion.p>
-
-          {/* ── CTA row ── */}
-          <motion.div variants={itemVariants} className="mb-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <CTAButton
-              href={`tel:${COMPANY_PHONE.replace(/\s/g, '')}`}
-              label="Call Now"
-              ariaLabel={`Call Kivesi Logistics on ${COMPANY_PHONE}`}
-              icon={Phone}
-              variant="primary"
-            />
-            <CTAButton
-              href={`https://wa.me/${COMPANY_WHATSAPP}`}
-              label="WhatsApp Us"
-              ariaLabel="Chat with Kivesi Logistics on WhatsApp"
-              icon={MessageCircle}
-              variant="secondary"
-              external
-            />
-            <CTAButton
-              href="/contact"
-              label="Get a Quote"
-              ariaLabel="Request a freight quote from Kivesi Logistics"
-              icon={Zap}
-              variant="ghost"
-            />
-          </motion.div>
-
-          {/* ── Trust micro-badges ── */}
-          <motion.ul
-            variants={itemVariants}
-            className="mb-9 flex flex-wrap items-center gap-x-5 gap-y-2"
-            aria-label="Trust indicators"
-          >
-            {TRUST_BADGES.map(({ icon: Icon, label }) => (
-              <li key={label} className="flex items-center gap-1.5 font-inter text-xs text-slate-500">
-                <Icon size={11} className="flex-shrink-0 text-blue-400" aria-hidden="true" />
-                {label}
-              </li>
-            ))}
-          </motion.ul>
-
-          {/* ── Stats row ── */}
+      {/* =========================================
+          MAIN CONTENT CONTAINER
+      ========================================= */}
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pt-28 pb-24 lg:px-8 lg:pt-32">
+        <div className="grid grid-cols-1 items-center gap-14 lg:grid-cols-2 lg:gap-16">
+          
+          {/* =========================================
+              LEFT: TEXT CONTENT
+          ========================================= */}
           <motion.div
-            variants={itemVariants}
-            className="grid grid-cols-2 gap-3 border-t pt-7 sm:grid-cols-4"
-            style={{ borderColor: 'rgba(255,255,255,0.07)' }}
-            aria-label="Company statistics"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-10"
           >
-            {STATS.map((stat) => (
-              <div
-                key={stat.label}
-                className="rounded-xl px-3 py-4 text-center"
+            {/* Premium Badge */}
+            <motion.div variants={itemVariants}>
+              <span
+                className="inline-flex items-center gap-2.5 rounded-full 
+                           border border-[#3b82f6]/25 bg-[#1e3a5f]/30 
+                           px-5 py-2.5 backdrop-blur-md backdrop-saturate-150
+                           transition-all duration-300 
+                           hover:border-[#3b82f6]/40 hover:bg-[#1e3a5f]/40"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full rounded-full 
+                                   bg-[#60a5fa] opacity-75 animate-ping" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[#60a5fa]" />
+                </span>
+                <span className="text-[11px] font-semibold uppercase tracking-[3.5px] 
+                                 text-[#cbd5e1]">
+                  Trusted Logistics Partner
+                </span>
+              </span>
+            </motion.div>
+
+            {/* Headline with Premium Typography */}
+            <motion.div variants={itemVariants} className="space-y-5">
+              <h1
+                id="hero-heading"
+                className="max-w-2xl text-5xl font-extrabold leading-[1.02] tracking-tight 
+                           text-white sm:text-6xl lg:text-7xl xl:text-8xl"
                 style={{
-                  background: 'rgba(255,255,255,0.025)',
-                  border: `1px solid ${BLUE.border}`,
+                  textShadow: '0 2px 10px rgba(59,130,246,0.15)'
                 }}
               >
-                <p
-                  className="font-poppins text-xl font-extrabold leading-tight text-white sm:text-2xl"
-                  style={{ textShadow: '0 0 20px rgba(147,197,253,0.35)' }}
+                <span className="block">Reliable Logistics &</span>
+                <span
+                  className="block bg-gradient-to-r from-[#93c5fd] via-[#60a5fa] to-[#3b82f6] 
+                             bg-clip-text text-transparent"
                 >
-                  <AnimatedCounter value={stat.value} suffix={stat.suffix} />
-                </p>
-                <p className="mt-1 font-inter text-[10.5px] text-slate-500">{stat.label}</p>
-              </div>
-            ))}
+                  Freight Solutions
+                </span>
+                <span className="block mt-3 text-[#94a3b8] font-bold">
+                  Across Tanzania
+                </span>
+              </h1>
+
+              <p className="max-w-xl text-base leading-relaxed text-[#94a3b8] sm:text-lg lg:text-xl">
+                Efficient transportation, cargo handling, warehousing, and freight solutions 
+                <span className="text-[#cbd5e1] font-medium"> tailored for enterprise </span>
+                businesses across East Africa. Fast. Secure. Always on time.
+              </p>
+            </motion.div>
+
+            {/* Premium CTA Buttons */}
+            <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-4">
+              <a
+                href="tel:+255700000000"
+                aria-label="Call Kivesi Logistics now"
+                className="group relative inline-flex items-center justify-center gap-2 
+                           rounded-full bg-gradient-to-r from-[#1e3a5f] to-[#0f2543] 
+                           px-8 py-4 text-sm font-semibold text-white 
+                           border border-[#3b82f6]/30
+                           shadow-lg shadow-[#0f2543]/40
+                           transition-all duration-300 
+                           hover:scale-[1.02] hover:border-[#60a5fa]/50 
+                           hover:shadow-[#1e3a5f]/60 hover:from-[#0f2543] hover:to-[#1e3a5f]
+                           focus:outline-none focus:ring-2 focus:ring-[#60a5fa]/50 focus:ring-offset-2 focus:ring-offset-[#061120]"
+                style={{
+                  WebkitFontSmoothing: 'antialiased',
+                  MozOsxFontSmoothing: 'grayscale'
+                }}
+              >
+                <svg className="h-4 w-4 transition-transform group-hover:scale-110" 
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                <span>Call Now</span>
+                {/* Metallic shine effect */}
+                <span className="absolute inset-0 rounded-full bg-gradient-to-r 
+                                 from-transparent via-white/10 to-transparent 
+                                 opacity-0 transition-opacity duration-300 
+                                 group-hover:opacity-100" />
+              </a>
+
+              <a
+                href="https://wa.me/255700000000"
+                aria-label="Chat with Kivesi Logistics on WhatsApp"
+                className="group inline-flex items-center justify-center gap-2 
+                           rounded-full border border-[#334155]/60 
+                           bg-[#0f172a]/40 px-8 py-4 text-sm font-medium 
+                           text-[#cbd5e1] backdrop-blur-md
+                           transition-all duration-300 
+                           hover:border-[#60a5fa]/40 hover:bg-[#1e293b]/60 
+                           hover:text-white hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]
+                           focus:outline-none focus:ring-2 focus:ring-[#60a5fa]/50 
+                           focus:ring-offset-2 focus:ring-offset-[#061120]"
+                style={{
+                  WebkitFontSmoothing: 'antialiased',
+                  MozOsxFontSmoothing: 'grayscale'
+                }}
+              >
+                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+                <span>WhatsApp Us</span>
+              </a>
+            </motion.div>
+
+            {/* Premium Statistics Bar */}
+            <motion.div
+              variants={itemVariants}
+              className="grid grid-cols-3 gap-6 pt-6 border-t border-[#334155]/40"
+            >
+              {stats.map((stat, index) => (
+                <div key={stat.label} className="text-left">
+                  <div className="text-3xl font-bold bg-gradient-to-r from-[#93c5fd] to-[#60a5fa] 
+                                  bg-clip-text text-transparent sm:text-4xl">
+                    {stat.value}
+                  </div>
+                  <p className="mt-1.5 text-xs font-medium text-[#64748b] tracking-wide">
+                    {stat.label}
+                  </p>
+                </div>
+              ))}
+            </motion.div>
           </motion.div>
-        </motion.div>
 
-        {/* ─────────────────────────────────────
-            RIGHT COLUMN  —  image + floating cards
-            Hidden on mobile; stacks below on sm/md
-        ───────────────────────────────────── */}
-        <motion.div
-          variants={imageVariants}
-          initial="hidden"
-          animate="visible"
-          className="relative mt-14 lg:mt-0"
-        >
-          {/* Outer ambient glow behind the frame */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-8 rounded-2xl"
-            style={{ background: 'rgba(37,99,235,0.16)', filter: 'blur(55px)' }}
-          />
-
-          {/* ── Image frame ── */}
-          <div
-            className="relative overflow-hidden rounded-2xl"
-            style={{
-              border: `1px solid ${BLUE.border}`,
-              boxShadow: '0 6px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04)',
-              background: 'rgba(8,20,40,0.5)',
-            }}
+          {/* =========================================
+              RIGHT: CINEMATIC IMAGE
+          ========================================= */}
+          <motion.div
+            variants={imageVariants}
+            initial="hidden"
+            animate="visible"
+            className="relative lg:order-last"
           >
-            {/*
-              aspect-[4/3] reserves exact space before image loads → zero CLS.
-              sizes matches the actual rendered column width at each breakpoint.
-              width/height are intrinsic hints that inform the srcset density
-              calculation — these match the Unsplash request params (?w=900).
-            */}
-            <div className="relative aspect-[4/3] w-full">
+            {/* Decorative Frame Glow */}
+            <div
+              aria-hidden="true"
+              className="absolute -inset-1 rounded-[40px] 
+                         bg-gradient-to-r from-[#3b82f6]/20 via-[#60a5fa]/10 to-transparent 
+                         blur-xl opacity-70"
+            />
+
+            {/* Main Image Container with Premium Treatment */}
+            <div
+              className="relative overflow-hidden rounded-[32px] 
+                         border border-[#334155]/50 bg-[#0a1628]/60 
+                         shadow-2xl shadow-[#020617]/60 backdrop-blur-sm"
+              style={{
+                WebkitFontSmoothing: 'antialiased',
+                MozOsxFontSmoothing: 'grayscale'
+              }}
+            >
+              {/* Industrial Corner Accents */}
+              <div aria-hidden="true" 
+                   className="absolute top-5 left-5 z-20 h-12 w-12 
+                              border-l-2 border-t-2 border-[#60a5fa]/40 rounded-tl-lg" />
+              <div aria-hidden="true" 
+                   className="absolute bottom-5 right-5 z-20 h-12 w-12 
+                              border-r-2 border-b-2 border-[#60a5fa]/40 rounded-br-lg" />
+
               <Image
-                src="https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=900&q=82"
-                alt="Kivesi Logistics heavy freight truck on a Tanzania highway"
-                fill
+                src="/hero-truck.webp"
+                alt="Kivesi Logistics premium freight truck operating across Tanzania"
+                width={1920}
+                height={1200}
                 priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover object-center"
-                style={{ colorScheme: 'normal' }}
+                quality={95}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 50vw"
+                className="h-full w-full object-cover transition-transform duration-700 
+                           hover:scale-[1.015]"
+                style={{
+                  WebkitFontSmoothing: 'antialiased'
+                }}
               />
+
+              {/* Cinematic Gradient Overlay */}
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 bg-gradient-to-t 
+                           from-[#061120]/50 via-[#061120]/10 to-transparent"
+              />
+
+              {/* Premium Floating Card */}
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                className="absolute bottom-6 left-6 right-6 sm:left-auto sm:right-6 sm:w-80 
+                           rounded-2xl border border-[#334155]/60 
+                           bg-[#0a1628]/85 backdrop-blur-xl backdrop-saturate-150
+                           p-5 shadow-xl shadow-[#020617]/40 z-20"
+              >
+                <div className="flex items-start gap-3.5">
+                  {/* Premium Icon Badge */}
+                  <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center 
+                                  rounded-full bg-gradient-to-br from-[#1e3a5f] to-[#0f2543] 
+                                  border border-[#3b82f6]/30 shadow-lg shadow-[#0f2543]/30">
+                    <svg className="h-5 w-5 text-[#93c5fd]" fill="none" stroke="currentColor" 
+                         viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-semibold uppercase tracking-wider 
+                                  text-[#64748b]">
+                      Service Guarantee
+                    </p>
+                    <h4 className="mt-1 text-sm font-semibold text-white truncate">
+                      Fast & Reliable Freight
+                    </h4>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-[#334155]/40">
+                  <p className="text-xs text-[#94a3b8]">
+                    <span className="font-bold text-[#93c5fd]">99.8%</span>{' '}
+                    on-time delivery rate across Tanzania
+                  </p>
+                </div>
+              </motion.div>
+
+              {/* Subtle 24/7 Badge */}
+              <motion.div
+                initial={{ opacity: 0, x: 16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 1.2, duration: 0.5 }}
+                className="absolute top-6 right-6 z-20 
+                           rounded-full border border-[#334155]/50 
+                           bg-[#0a1628]/90 px-4 py-2 backdrop-blur-md"
+              >
+                <span className="text-[11px] font-semibold text-[#cbd5e1]">
+                  🚚 24/7 Operations
+                </span>
+              </motion.div>
             </div>
 
-            {/* Bottom vignette — blends image into the section bg */}
+            {/* Subtle Reflection Effect */}
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0"
-              style={{ background: 'linear-gradient(to top, rgba(4,16,30,0.55) 0%, transparent 45%)' }}
+              className="absolute -bottom-8 left-1/2 h-16 w-[90%] -translate-x-1/2 
+                         rounded-[100%] bg-gradient-to-r from-[#3b82f6]/10 via-transparent to-[#3b82f6]/10 
+                         blur-2xl opacity-40"
             />
-
-            {/* Right-edge inner shadow — creates depth, not cheap border */}
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 rounded-2xl"
-              style={{ boxShadow: 'inset 1px 1px 0 rgba(147,197,253,0.07), inset -1px -1px 0 rgba(0,0,0,0.3)' }}
-            />
-          </div>
-
-          {/* ── Corner bracket accents (decorative, not drawn on image) ── */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -left-3.5 -top-3.5 h-16 w-16"
-            style={{ borderTop: '2px solid rgba(147,197,253,0.30)', borderLeft: '2px solid rgba(147,197,253,0.30)', borderRadius: '12px 0 0 0' }}
-          />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -bottom-3.5 -right-3.5 h-16 w-16"
-            style={{ borderBottom: '2px solid rgba(147,197,253,0.18)', borderRight: '2px solid rgba(147,197,253,0.18)', borderRadius: '0 0 12px 0' }}
-          />
-
-          {/* ── Floating info cards ── */}
-          {FLOATING_CARDS.map((card) => (
-            <FloatingCard
-              key={card.id}
-              icon={card.icon}
-              title={card.title}
-              sub={card.sub}
-              positionClass={card.position}
-              floatY={card.floatY}
-              delay={card.delay}
-              reduceMotion={reduceMotion}
-            />
-          ))}
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
 
-      {/* ══════════════════════════════════════
-          SCROLL INDICATOR
-          – aria-hidden: purely decorative
-          – tabIndex=-1: keyboard users skip it
-      ══════════════════════════════════════ */}
+      {/* =========================================
+          SCROLL INDICATOR (Cinematic Touch)
+      ========================================= */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 2.2, duration: 0.7 }}
-        className="absolute bottom-7 left-1/2 z-10 -translate-x-1/2"
-        aria-hidden="true"
+        transition={{ delay: 1.8, duration: 0.6 }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 hidden lg:block"
       >
         <a
           href="#services"
-          tabIndex={-1}
-          className="flex flex-col items-center gap-2"
-          style={{ color: 'rgba(148,163,184,0.55)' }}
+          className="group flex flex-col items-center gap-2.5 text-[#64748b] 
+                     transition-colors duration-300 hover:text-[#93c5fd]"
+          aria-label="Scroll to services section"
+          style={{
+            WebkitFontSmoothing: 'antialiased',
+            MozOsxFontSmoothing: 'grayscale'
+          }}
         >
-          <span className="font-inter text-[10px] uppercase tracking-[0.14em]">Explore</span>
+          <span className="text-[10px] font-semibold uppercase tracking-[2px]">
+            Explore
+          </span>
           <motion.div
-            animate={reduceMotion ? undefined : { y: [0, 7, 0] }}
-            transition={{ repeat: Infinity, duration: 1.7, ease: 'easeInOut' }}
-            className="flex h-9 w-5 items-start justify-center rounded-full pt-1.5"
-            style={{ border: '1px solid rgba(147,197,253,0.15)' }}
+            animate={{ y: [0, 8, 0] }}
+            transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+            className="flex h-10 w-6 items-start justify-center rounded-full 
+                       border border-[#334155]/60 p-1.5"
           >
-            <ChevronDown size={11} className="text-blue-400" />
+            <div className="h-2 w-1 rounded-full bg-gradient-to-b from-[#60a5fa] to-[#3b82f6]" />
           </motion.div>
         </a>
       </motion.div>
+
+      {/* =========================================
+          KEYFRAME ANIMATION (Embedded as style tag)
+      ========================================= */}
+      <style>{`
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 0.5; }
+        }
+        
+        /* Premium focus ring for accessibility */
+        *:focus-visible {
+          outline: none;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+        
+        /* Smooth font rendering */
+        * {
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Premium selection color */
+        ::selection {
+          background: rgba(59, 130, 246, 0.2);
+          color: #ffffff;
+        }
+        
+        /* Premium scrollbar */
+        ::-webkit-scrollbar {
+          width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+          background: #061120;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: linear-gradient(to bottom, #1e3a5f, #0f2543);
+          border-radius: 4px;
+          border: 2px solid #061120;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(to bottom, #3b82f6, #1e3a5f);
+        }
+      `}</style>
     </section>
   )
 }
