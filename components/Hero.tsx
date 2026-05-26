@@ -3,6 +3,15 @@
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Inter } from 'next/font/google'
+import {
+  ArrowUpRight,
+  Phone,
+  MessageCircle
+} from 'lucide-react'
+
+/* =========================================
+   Font
+========================================= */
 
 const inter = Inter({
   subsets: ['latin'],
@@ -14,12 +23,11 @@ const inter = Inter({
 ========================================= */
 
 const containerVariants = {
-  hidden: { opacity: 0 },
+  hidden: {},
   visible: {
-    opacity: 1,
     transition: {
       staggerChildren: 0.12,
-      delayChildren: 0.15
+      delayChildren: 0.1
     }
   }
 }
@@ -33,7 +41,7 @@ const itemVariants = {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.6,
+      duration: 0.65,
       ease: 'easeOut'
     }
   }
@@ -50,11 +58,11 @@ const stats = [
   },
   {
     value: '50+',
-    label: 'Fleet'
+    label: 'Fleet Vehicles'
   },
   {
     value: '20+',
-    label: 'Regions'
+    label: 'Regions Covered'
   }
 ]
 
@@ -69,7 +77,6 @@ export default function Hero() {
       className={`
         ${inter.className}
         relative
-        min-h-screen
         overflow-hidden
         bg-[#061120]
       `}
@@ -86,10 +93,13 @@ export default function Hero() {
           priority
           quality={90}
           sizes="100vw"
-          className="object-cover"
+          className="
+            object-cover
+            object-center
+          "
         />
 
-        {/* Overlay */}
+        {/* Premium Overlay */}
 
         <div
           className="
@@ -97,14 +107,29 @@ export default function Hero() {
             inset-0
             bg-gradient-to-r
             from-[#061120]/95
-            via-[#061120]/75
-            to-[#061120]/45
+            via-[#061120]/78
+            to-[#061120]/55
+          "
+        />
+
+        {/* Soft Glow */}
+
+        <div
+          className="
+            absolute
+            right-0
+            top-0
+            h-[450px]
+            w-[450px]
+            rounded-full
+            bg-blue-500/10
+            blur-[120px]
           "
         />
       </div>
 
       {/* =========================================
-          Main Content
+          Main Container
       ========================================= */}
 
       <div
@@ -117,7 +142,8 @@ export default function Hero() {
           max-w-7xl
           items-center
           px-6
-          py-28
+          pt-32
+          pb-20
           lg:px-8
         "
       >
@@ -125,9 +151,14 @@ export default function Hero() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="max-w-3xl"
+          className="
+            w-full
+            max-w-4xl
+          "
         >
-          {/* Badge */}
+          {/* =========================================
+              Badge
+          ========================================= */}
 
           <motion.div variants={itemVariants}>
             <div
@@ -139,13 +170,20 @@ export default function Hero() {
                 rounded-full
                 border
                 border-white/10
-                bg-white/5
+                bg-white/[0.04]
                 px-5
                 py-2.5
                 backdrop-blur-md
               "
             >
-              <div className="h-2 w-2 rounded-full bg-blue-400" />
+              <div
+                className="
+                  h-2
+                  w-2
+                  rounded-full
+                  bg-blue-400
+                "
+              />
 
               <span
                 className="
@@ -161,61 +199,66 @@ export default function Hero() {
             </div>
           </motion.div>
 
-          {/* Heading */}
+          {/* =========================================
+              Heading
+          ========================================= */}
 
           <motion.div
             variants={itemVariants}
-            className="mb-7"
+            className="max-w-4xl"
           >
             <h1
               className="
                 text-5xl
                 font-bold
-                leading-[1.05]
+                leading-[1.02]
                 tracking-tight
                 text-white
                 sm:text-6xl
                 lg:text-7xl
+                xl:text-[82px]
               "
             >
               Reliable Logistics
-              <span className="block text-blue-400">
+              <span className="block text-white">
                 & Freight Solutions
+              </span>
+              <span
+                className="
+                  mt-2
+                  block
+                  text-blue-400
+                "
+              >
+                Across Tanzania
               </span>
             </h1>
           </motion.div>
 
-          {/* Description */}
-
-          <motion.p
-            variants={itemVariants}
-            className="
-              mb-10
-              max-w-2xl
-              text-lg
-              leading-8
-              text-slate-300
-              sm:text-xl
-            "
-          >
-            Fast, secure and reliable freight services
-            across Tanzania and East Africa.
-          </motion.p>
-
-          {/* Buttons */}
+          {/* =========================================
+              CTA Buttons
+          ========================================= */}
 
           <motion.div
             variants={itemVariants}
-            className="flex flex-wrap gap-4"
+            className="
+              mt-10
+              flex
+              flex-col
+              gap-4
+              sm:flex-row
+            "
           >
             {/* Call Button */}
 
             <a
-              href="tel:+255700000000"
+              href="tel:0689583281"
               className="
+                group
                 inline-flex
                 items-center
                 justify-center
+                gap-3
                 rounded-full
                 bg-blue-600
                 px-8
@@ -223,27 +266,44 @@ export default function Hero() {
                 text-sm
                 font-semibold
                 text-white
+                shadow-lg
+                shadow-blue-900/20
                 transition-all
                 duration-300
-                hover:bg-blue-500
                 hover:scale-[1.02]
+                hover:bg-blue-500
               "
             >
-              Call Now
+              <Phone className="h-4 w-4" />
+
+              <span>Call Now</span>
+
+              <ArrowUpRight
+                className="
+                  h-4
+                  w-4
+                  transition-transform
+                  duration-300
+                  group-hover:translate-x-1
+                  group-hover:-translate-y-1
+                "
+              />
             </a>
 
             {/* WhatsApp Button */}
 
             <a
-              href="https://wa.me/255700000000"
+              href="https://wa.me/255689583281"
               className="
+                group
                 inline-flex
                 items-center
                 justify-center
+                gap-3
                 rounded-full
                 border
                 border-white/15
-                bg-white/5
+                bg-white/[0.04]
                 px-8
                 py-4
                 text-sm
@@ -252,25 +312,42 @@ export default function Hero() {
                 backdrop-blur-md
                 transition-all
                 duration-300
-                hover:bg-white/10
-                hover:border-white/25
+                hover:border-blue-400/30
+                hover:bg-white/[0.08]
               "
             >
-              WhatsApp Us
+              <MessageCircle className="h-4 w-4" />
+
+              <span>WhatsApp Us</span>
+
+              <ArrowUpRight
+                className="
+                  h-4
+                  w-4
+                  transition-transform
+                  duration-300
+                  group-hover:translate-x-1
+                  group-hover:-translate-y-1
+                "
+              />
             </a>
           </motion.div>
 
-          {/* Statistics */}
+          {/* =========================================
+              Statistics
+          ========================================= */}
 
           <motion.div
             variants={itemVariants}
             className="
-              mt-14
-              flex
-              gap-10
+              mt-16
+              grid
+              grid-cols-3
+              gap-6
               border-t
               border-white/10
-              pt-7
+              pt-8
+              sm:max-w-2xl
             "
           >
             {stats.map((stat) => (
@@ -302,6 +379,23 @@ export default function Hero() {
           </motion.div>
         </motion.div>
       </div>
+
+      {/* =========================================
+          Bottom Gradient Fade
+      ========================================= */}
+
+      <div
+        className="
+          absolute
+          bottom-0
+          left-0
+          h-32
+          w-full
+          bg-gradient-to-t
+          from-[#061120]
+          to-transparent
+        "
+      />
     </section>
   )
 }
