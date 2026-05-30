@@ -2,32 +2,15 @@
 
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Inter } from 'next/font/google'
-import {
-  ArrowUpRight,
-  Phone,
-  MessageCircle
-} from 'lucide-react'
-
-/* =========================================
-   Font
-========================================= */
-
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap'
-})
-
-/* =========================================
-   Animation Variants
-========================================= */
+import { Phone, MessageCircle, ArrowUpRight } from 'lucide-react'
 
 const containerVariants = {
-  hidden: {},
+  hidden: { opacity: 0 },
   visible: {
+    opacity: 1,
     transition: {
       staggerChildren: 0.12,
-      delayChildren: 0.1
+      delayChildren: 0.15
     }
   }
 }
@@ -35,102 +18,78 @@ const containerVariants = {
 const itemVariants = {
   hidden: {
     opacity: 0,
-    y: 24
+    y: 20
   },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.65,
-      ease: 'easeOut'
+      duration: 0.6
     }
   }
 }
-
-/* =========================================
-   Statistics
-========================================= */
-
-const stats = [
-  {
-    value: '500+',
-    label: 'Deliveries'
-  },
-  {
-    value: '50+',
-    label: 'Fleet Vehicles'
-  },
-  {
-    value: '20+',
-    label: 'Regions Covered'
-  }
-]
-
-/* =========================================
-   Component
-========================================= */
 
 export default function Hero() {
   return (
     <section
       id="home"
-      className={`
-        ${inter.className}
+      className="
         relative
+        min-h-[100svh]
         overflow-hidden
         bg-[#061120]
-      `}
+      "
     >
-      {/* =========================================
-          Background Image
-      ========================================= */}
+      {/* Background */}
 
       <div className="absolute inset-0">
         <Image
           src="/hero-truck.webp"
-          alt="Kivesi Logistics Truck"
+          alt="Kivesi Logistics Fleet"
           fill
           priority
-          quality={90}
-          sizes="100vw"
+          quality={80}
+          sizes="
+            (max-width:768px) 100vw,
+            (max-width:1200px) 100vw,
+            1920px
+          "
           className="
             object-cover
-            object-center
+            object-[72%_center]
           "
         />
 
-        {/* Premium Overlay */}
+        {/* Overlay */}
 
         <div
           className="
             absolute
             inset-0
             bg-gradient-to-r
-            from-[#061120]/95
-            via-[#061120]/78
-            to-[#061120]/55
+            from-[#061120]/88
+            via-[#061120]/65
+            to-[#061120]/30
           "
         />
 
-        {/* Soft Glow */}
+        {/* Blue Glow */}
 
         <div
           className="
             absolute
             right-0
             top-0
-            h-[450px]
-            w-[450px]
+            h-[500px]
+            w-[500px]
             rounded-full
             bg-blue-500/10
-            blur-[120px]
+            blur-[140px]
           "
         />
       </div>
 
-      {/* =========================================
-          Main Container
-      ========================================= */}
+      {/* Content */}
 
       <div
         className="
@@ -138,11 +97,11 @@ export default function Hero() {
           z-10
           mx-auto
           flex
-          min-h-screen
+          min-h-[100svh]
           max-w-7xl
           items-center
           px-6
-          pt-32
+          pt-28
           pb-20
           lg:px-8
         "
@@ -151,14 +110,9 @@ export default function Hero() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="
-            w-full
-            max-w-4xl
-          "
+          className="max-w-3xl"
         >
-          {/* =========================================
-              Badge
-          ========================================= */}
+          {/* Badge */}
 
           <motion.div variants={itemVariants}>
             <div
@@ -170,20 +124,13 @@ export default function Hero() {
                 rounded-full
                 border
                 border-white/10
-                bg-white/[0.04]
+                bg-white/5
                 px-5
                 py-2.5
                 backdrop-blur-md
               "
             >
-              <div
-                className="
-                  h-2
-                  w-2
-                  rounded-full
-                  bg-blue-400
-                "
-              />
+              <div className="h-2 w-2 rounded-full bg-blue-400" />
 
               <span
                 className="
@@ -199,45 +146,29 @@ export default function Hero() {
             </div>
           </motion.div>
 
-          {/* =========================================
-              Heading
-          ========================================= */}
+          {/* Heading */}
 
-          <motion.div
-            variants={itemVariants}
-            className="max-w-4xl"
-          >
+          <motion.div variants={itemVariants}>
             <h1
               className="
-                text-5xl
+                text-4xl
                 font-bold
-                leading-[1.02]
+                leading-tight
                 tracking-tight
                 text-white
-                sm:text-6xl
+                sm:text-5xl
+                md:text-6xl
                 lg:text-7xl
-                xl:text-[82px]
               "
             >
-              Reliable Logistics
-              <span className="block text-white">
-                & Freight Solutions
-              </span>
-              <span
-                className="
-                  mt-2
-                  block
-                  text-blue-400
-                "
-              >
+              Delivering
+              <span className="block text-blue-400">
                 Across Tanzania
               </span>
             </h1>
           </motion.div>
 
-          {/* =========================================
-              CTA Buttons
-          ========================================= */}
+          {/* CTA */}
 
           <motion.div
             variants={itemVariants}
@@ -249,13 +180,13 @@ export default function Hero() {
               sm:flex-row
             "
           >
-            {/* Call Button */}
-
             <a
-              href="tel:0689583281"
+              href="tel:+255689583281"
               className="
                 group
                 inline-flex
+                w-full
+                sm:w-auto
                 items-center
                 justify-center
                 gap-3
@@ -263,25 +194,21 @@ export default function Hero() {
                 bg-blue-600
                 px-8
                 py-4
-                text-sm
                 font-semibold
                 text-white
-                shadow-lg
-                shadow-blue-900/20
                 transition-all
                 duration-300
-                hover:scale-[1.02]
                 hover:bg-blue-500
+                hover:scale-[1.02]
               "
             >
-              <Phone className="h-4 w-4" />
+              <Phone size={18} />
 
-              <span>Call Now</span>
+              Call Now
 
               <ArrowUpRight
+                size={18}
                 className="
-                  h-4
-                  w-4
                   transition-transform
                   duration-300
                   group-hover:translate-x-1
@@ -290,40 +217,40 @@ export default function Hero() {
               />
             </a>
 
-            {/* WhatsApp Button */}
-
             <a
               href="https://wa.me/255689583281"
+              target="_blank"
+              rel="noopener noreferrer"
               className="
                 group
                 inline-flex
+                w-full
+                sm:w-auto
                 items-center
                 justify-center
                 gap-3
                 rounded-full
                 border
                 border-white/15
-                bg-white/[0.04]
+                bg-white/5
                 px-8
                 py-4
-                text-sm
                 font-semibold
                 text-white
                 backdrop-blur-md
                 transition-all
                 duration-300
+                hover:bg-white/10
                 hover:border-blue-400/30
-                hover:bg-white/[0.08]
               "
             >
-              <MessageCircle className="h-4 w-4" />
+              <MessageCircle size={18} />
 
-              <span>WhatsApp Us</span>
+              WhatsApp Us
 
               <ArrowUpRight
+                size={18}
                 className="
-                  h-4
-                  w-4
                   transition-transform
                   duration-300
                   group-hover:translate-x-1
@@ -332,57 +259,10 @@ export default function Hero() {
               />
             </a>
           </motion.div>
-
-          {/* =========================================
-              Statistics
-          ========================================= */}
-
-          <motion.div
-            variants={itemVariants}
-            className="
-              mt-16
-              grid
-              grid-cols-3
-              gap-6
-              border-t
-              border-white/10
-              pt-8
-              sm:max-w-2xl
-            "
-          >
-            {stats.map((stat) => (
-              <div key={stat.label}>
-                <h3
-                  className="
-                    text-3xl
-                    font-bold
-                    text-white
-                    sm:text-4xl
-                  "
-                >
-                  {stat.value}
-                </h3>
-
-                <p
-                  className="
-                    mt-2
-                    text-xs
-                    uppercase
-                    tracking-[2px]
-                    text-slate-400
-                  "
-                >
-                  {stat.label}
-                </p>
-              </div>
-            ))}
-          </motion.div>
         </motion.div>
       </div>
 
-      {/* =========================================
-          Bottom Gradient Fade
-      ========================================= */}
+      {/* Bottom Fade */}
 
       <div
         className="
