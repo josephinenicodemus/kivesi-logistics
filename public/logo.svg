@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 120" width="100%" height="100%">
+  <!-- Group wrapper for scaling -->
+  <g>
+    <!-- Icon Group -->
+    <g transform="translate(10, 10)">
+      <!-- Subtle Globe Background Circle to signify regional / cross-border reach -->
+      <circle cx="45" cy="45" r="40" fill="none" stroke="#003E91" stroke-width="2" stroke-dasharray="4 4" opacity="0.25" />
+      <path d="M 10 45 C 10 25, 80 25, 80 45 C 80 65, 10 65, 10 45 Z" fill="none" stroke="#003E91" stroke-width="1.5" stroke-dasharray="2 2" opacity="0.2" />
+      
+      <!-- Motion Speed Lines (showing fast delivery & reliability) -->
+      <line x1="2" y1="35" x2="16" y2="35" stroke="#003E91" stroke-width="3" stroke-linecap="round" />
+      <line x1="-2" y1="45" x2="12" y2="45" stroke="#003E91" stroke-width="3" stroke-linecap="round" />
+      <line x1="5" y1="55" x2="18" y2="55" stroke="#003E91" stroke-width="3" stroke-linecap="round" />
+
+      <!-- Logistics Semi-Trailer Truck Shape -->
+      <!-- Main Cargo Trailer -->
+      <rect x="22" y="26" width="34" height="28" rx="2" fill="#003E91" />
+      
+      <!-- Truck Cabin (Modern Aerodynamic design) -->
+      <path d="M 58 30 L 70 30 C 75 30 78 33 79 38 L 81 54 L 58 54 Z" fill="#003E91" />
+      
+      <!-- Cabin Windshield -->
+      <path d="M 60 34 L 68 34 C 70 34 71 35 71 37 L 72 43 L 60 43 Z" fill="#FFFFFF" opacity="0.9" />
+      
+      <!-- Wheels (with white hubs for sharp contrast) -->
+      <circle cx="32" cy="57" r="7" fill="#1F2937" />
+      <circle cx="32" cy="57" r="2.5" fill="#FFFFFF" />
+      
+      <!-- Double Rear Wheels -->
+      <circle cx="48" cy="57" r="7" fill="#1F2937" />
+      <circle cx="48" cy="57" r="2.5" fill="#FFFFFF" />
+      
+      <!-- Front Cab Wheel -->
+      <circle cx="71" cy="57" r="7" fill="#1F2937" />
+      <circle cx="71" cy="57" r="2.5" fill="#FFFFFF" />
+
+      <!-- Shadow underneath truck (flat design, no gradient) -->
+      <rect x="15" y="67" width="62" height="3" rx="1.5" fill="#1F2937" opacity="0.15" />
+    </g>
+
+    <!-- Company Name Text Group -->
+    <g transform="translate(115, 0)">
+      <!-- Main Headline (KIVESI) -->
+      <text x="0" y="60" font-family="'Inter', sans-serif" font-size="38" font-weight="900" fill="#003E91" letter-spacing="1.5">KIVESI</text>
+      <!-- Subtitle (LOGISTICS) -->
+      <text x="0" y="88" font-family="'Inter', sans-serif" font-size="15" font-weight="700" fill="#4B5563" letter-spacing="7.5">LOGISTICS</text>
+    </g>
+  </g>
+</svg>
